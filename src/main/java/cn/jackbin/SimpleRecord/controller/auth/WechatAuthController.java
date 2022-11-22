@@ -11,6 +11,7 @@ import cn.jackbin.SimpleRecord.vo.WechatUserVO;
 import com.alibaba.fastjson.JSON;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.validation.annotation.Validated;
@@ -21,14 +22,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * @author: create by bin
- * @version: v1.0
- * @description: cn.jackbin.SimpleRecord.controller.auth
- * @date: 2020/11/2 20:45
- **/
+ * 微信授权接口
+ *
+ * @author Eli.Gui 2022-11-10 14:59:47
+ */
 @Api(value = "WechatAuthController", tags = { "微信授权接口" })
 @RestController
 @RequestMapping("/wx")
+@Slf4j
 public class WechatAuthController {
     @Value("${wechat.appId}")
     private String appId;

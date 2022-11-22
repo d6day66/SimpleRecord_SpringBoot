@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) 厦门市汇银通达数字科技有限公司  2022-2030. All rights reserved.
+  -->
+
+<configuration>
+
+    <springProperty scope="context" name="appName" source="spring.application.name"/>
+    <conversionRule conversionWord="ip" converterClass="cn.jackbin.SimpleRecord.common.config.log.IpAddressClassicConverter" />
+    <property name="saveDir" value="./logs"/>
+
+    <!-- 文件输出格式 -->
+    <property name="PATTERN"
+              value="[%d{yyyy-MM-dd HH:mm:ss.SSS} %ip ${appName} %highlight(%-5level) %yellow(%X{X-B3-TraceId}),%green(%X{X-B3-SpanId}),%blue(%X{X-B3-ParentSpanId}) %yellow(%thread) %green(%logger) %msg%n"/>
+
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${saveDir}/${appName}/${appName}.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${saveDir}/${appName}/${appName}-%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>30</maxHistory>
+        </rollingPolicy>
+        <encoder><!-- 必须指定，否则不会往文件输出内容 -->
+            <pattern>${PATTERN}</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>${PATTERN}</pattern>
+        </encoder>
+    </appender>
+    <logger name="jdbc.connection" additivity="false" level="FATAL">
+        <appender-ref ref="CONSOLE"/>
+    </logger>
+    <logger name="jdbc.resultset" additivity="false" level="WARN">
+        <appender-ref ref="CONSOLE"/>
+    </logger>
+    <logger name="jdbc.audit" additivity="false" level="WARN">
+        <appender-ref ref="CONSOLE"/>
+    </logger>
+    <logger name="jdbc.sqlonly" additivity="false" level="DEBUG">
+        <appender-ref ref="CONSOLE"/>
+    </logger>
+    <logger name="jdbc.sqltiming" additivity="false" level="WARN">
+        <appender-ref ref="CONSOLE"/>
+    </logger>
+
+    <root level="INFO">
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="FILE"/>
+    </root>
+</configuration>

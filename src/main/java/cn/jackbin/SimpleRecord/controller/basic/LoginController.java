@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
  * @date: 2021/2/1 20:48
  **/
 @Api(value = "LoginController", tags = { "用户登录接口" })
-@RequestMapping(value = "/")
+@RequestMapping(value = "/test")
 public class LoginController {
 
     @ApiOperation(value = "用户登录")

@@ -1,6 +1,8 @@
 # 主配置文件
 # 激活环境配置
 spring:
+  application:
+    name: record
   profiles:
     active: dev
 # 统一请求前缀
@@ -12,7 +14,7 @@ server:
 
 # 日志配置文件（日志配置文件）
 logging:
-  config: classpath:log4j2.xml
+  config: classpath:logback-spring-${spring.profiles.active}.xml
 
 
 # jwt相关配置
@@ -24,8 +26,6 @@ jwt:
 #mybatis-plus
 mybatis-plus:
   mapper-locations: classpath:mapper/*.xml
-  configuration:
-    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl # 打印将执行的sql语句
   global-config:
     db-config:
       logic-delete-field: delete_time
