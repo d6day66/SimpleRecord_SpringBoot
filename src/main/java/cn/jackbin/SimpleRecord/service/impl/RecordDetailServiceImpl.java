@@ -1,15 +1,22 @@
 package cn.jackbin.SimpleRecord.service.impl;
 
 import cn.jackbin.SimpleRecord.bo.PageBO;
+import cn.jackbin.SimpleRecord.constant.CodeMsg;
+import cn.jackbin.SimpleRecord.constant.CommonConstants;
 import cn.jackbin.SimpleRecord.constant.RecordConstant;
+import cn.jackbin.SimpleRecord.dto.RecordDetailBookSumDTO;
 import cn.jackbin.SimpleRecord.dto.SpendCategoryTotalDTO;
-import cn.jackbin.SimpleRecord.dto.RecordDTO;
+import cn.jackbin.SimpleRecord.entity.DictDO;
+import cn.jackbin.SimpleRecord.entity.DictItemDO;
 import cn.jackbin.SimpleRecord.entity.RecordDetailDO;
+import cn.jackbin.SimpleRecord.exception.BusinessException;
 import cn.jackbin.SimpleRecord.mapper.RecordDetailMapper;
+import cn.jackbin.SimpleRecord.service.DictItemService;
+import cn.jackbin.SimpleRecord.service.DictService;
 import cn.jackbin.SimpleRecord.service.RecordDetailService;
 import cn.jackbin.SimpleRecord.dto.RecordDetailDTO;
 import cn.jackbin.SimpleRecord.utils.DateUtil;
-import cn.jackbin.SimpleRecord.bo.MonthRecordBO;
+import cn.jackbin.SimpleRecord.dto.MonthRecordAnalysisDTO;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -17,6 +24,8 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -34,20 +43,95 @@ import java.util.Objects;
 public class RecordDetailServiceImpl extends ServiceImpl<RecordDetailMapper, RecordDetailDO> implements RecordDetailService {
     @Autowired
     private RecordDetailMapper recordDetailMapper;
+    @Autowired
+    private DictItemService dictItemService;
+    @Autowired
+    private DictService dictService;
 
     @Override
-    public boolean createRecord(RecordDTO recordDTO, Long userId) {
-        RecordDetailDO recordDO = new RecordDetailDO();
-        recordDO.setUserId(userId.intValue());
-        recordDO.setSpendCategoryId(recordDTO.getSpendCategoryId());
-        recordDO.setAmount(recordDTO.getAmount());
-        recordDO.setOccurTime(recordDTO.getOccurTime());
-        recordDO.setRemark(recordDTO.getRemark());
-        return recordDetailMapper.insert(recordDO) > 0;
+    public int add(Integer userId, Integer recordAccountId, Integer recordBookId, Integer recordTypeId, String recordCategory, Double amount,
+                    Date occurTime, String tag, String remark, Integer recoverableStatus) {
+        return add(userId, recordAccountId, null, null, recordBookId, null, recordTypeId, recordCategory,
+                amount, occurTime, tag, remark, recoverableStatus);
     }
 
     @Override
-    public List<RecordDetailDO> getRecordsByUserId(Long userId) {
+    public int add(Integer userId, Integer recordAccountId, Integer sourceAccountId, Integer targetAccountId, Integer recordBookId,
+                   Integer relationRecordId, Integer recordTypeId, String recordCategory, Double amount, Date occurTime,
+                   String tag, String remark, Integer recoverableStatus) {
+        RecordDetailDO recordDetailDO = new RecordDetailDO();
+        recordDetailDO.setUserId(userId);
+        recordDetailDO.setRecordAccountId(recordAccountId);
+        recordDetailDO.setSourceAccountId(sourceAccountId);
+        recordDetailDO.setTargetAccountId(targetAccountId);
+        recordDetailDO.setRecordBookId(recordBookId);
+        recordDetailDO.setRelationRecordId(relationRecordId);
+        recordDetailDO.setRecordType(recordTypeId);
+        recordDetailDO.setRecordCategory(recordCategory);
+        recordDetailDO.setOccurTime(occurTime);
+        recordDetailDO.setAmount(amount);
+        recordDetailDO.setTag(tag);
+        recordDetailDO.setRemark(remark);
+        recordDetailDO.setRecoverableStatus(recoverableStatus);
+        recordDetailDO.setStatus(CommonConstants.STATUS_NORMAL);
+        if (recordDetailMapper.insert(recordDetailDO) < 1){
+            throw new BusinessException(CodeMsg.ADD_DATA_ERROR);
+        }
+        return recordDetailDO.getId().intValue();
+    }
+
+    @Override
+    public void update(Long id, Integer recordAccountId, Integer recordBookId, Integer recordTypeId, String recordCategory, Double amount, Date occurTime, String tag, String remark, Integer recoverableStatus) {
+        RecordDetailDO recordDetailDO = new RecordDetailDO();
+        recordDetailDO.setId(id);
+        recordDetailDO.setRecordAccountId(recordAccountId);
+        recordDetailDO.setRecordBookId(recordBookId);
+        recordDetailDO.setRecordType(recordTypeId);
+        recordDetailDO.setRecordCategory(recordCategory);
+        recordDetailDO.setOccurTime(occurTime);
+        recordDetailDO.setAmount(amount);
+        recordDetailDO.setTag(tag);
+        recordDetailDO.setRemark(remark);
+        recordDetailDO.setRecoverableStatus(recoverableStatus);
+        recordDetailMapper.updateById(recordDetailDO);
+    }
+
+    @Override
+    public void update(Long id, Integer recordBookId, Double amount, Date occurTime, String tag, String remark) {
+        RecordDetailDO recordDetailDO = new RecordDetailDO();
+        recordDetailDO.setId(id);
+        recordDetailDO.setRecordBookId(recordBookId);
+        recordDetailDO.setOccurTime(occurTime);
+        recordDetailDO.setAmount(amount);
+        recordDetailDO.setTag(tag);
+        recordDetailDO.setRemark(remark);
+        recordDetailMapper.updateById(recordDetailDO);
+    }
+
+    @Override
+    public RecordDetailDO getByRId(Integer rid) {
+        QueryWrapper<RecordDetailDO> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("relation_record_id", rid);
+        return recordDetailMapper.selectOne(queryWrapper);
+    }
+
+    @Override
+    public void updateRId(Long id, Integer rid) {
+        RecordDetailDO recordDetailDO = new RecordDetailDO();
+        recordDetailDO.setId(id);
+        recordDetailDO.setRelationRecordId(rid);
+        recordDetailMapper.updateById(recordDetailDO);
+    }
+
+    @Override
+    public void removeByRId(Long rid) {
+        QueryWrapper<RecordDetailDO> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("relation_record_id", rid);
+        recordDetailMapper.delete(queryWrapper);
+    }
+
+    @Override
+    public List<RecordDetailDO> getRecordsByUserId(Integer userId) {
         QueryWrapper<RecordDetailDO> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("user_id",userId);
         return recordDetailMapper.selectList(queryWrapper);
@@ -63,79 +147,92 @@ public class RecordDetailServiceImpl extends ServiceImpl<RecordDetailMapper, Rec
     }
 
     @Override
-    public RecordDetailDO getById(Long id) {
-        return recordDetailMapper.selectById(id);
-    }
-
-    @Override
-    public boolean updateRecord(RecordDetailDO recordDetailDO, RecordDTO dto) {
-        if (dto.getSpendCategoryId() != null) {
-            dto.setSpendCategoryId(dto.getSpendCategoryId());
-        }
-        recordDetailDO.setOccurTime(dto.getOccurTime());
-        recordDetailDO.setAmount(dto.getAmount());
-        recordDetailDO.setRemark(dto.getRemark());
-        return recordDetailMapper.updateById(recordDetailDO) > 0;
-    }
-
-    @Override
-    public boolean deleteById(Long id) {
-        return recordDetailMapper.deleteById(id) > 0;
-    }
-
-    @Override
-    public List<Double> getSpendTotalByMonth(Long userId, Date date) {
+    public List<Double> getSpendTotalByMonth(Integer userId, Date date) {
         List<Double> list = new ArrayList<>();
-        Double expendTotal = recordDetailMapper.querySpendTotalByMonth(userId, RecordConstant.EXPEND_RECORD_TYPE, date);
-        Double incomeTotal = recordDetailMapper.querySpendTotalByMonth(userId, RecordConstant.INCOME_RECORD_TYPE, date);
+        DictDO dictDO = dictService.getByCode(RecordConstant.RECORD_TYPE);
+        DictItemDO expendDictItemDO = dictItemService.getByValue(dictDO.getId().intValue(), RecordConstant.EXPEND_RECORD_TYPE);
+        DictItemDO incomeDictItemDO = dictItemService.getByValue(dictDO.getId().intValue(), RecordConstant.INCOME_RECORD_TYPE);
+        Double expendTotal = recordDetailMapper.queryTotalByMonth(userId, expendDictItemDO.getId().intValue(), date);
+        Double incomeTotal = recordDetailMapper.queryTotalByMonth(userId, incomeDictItemDO.getId().intValue(), date);
         list.add(Objects.requireNonNullElse(expendTotal, 0.0));
         list.add(Objects.requireNonNullElse(incomeTotal, 0.0));
         return list;
     }
 
     @Override
-    public List<SpendCategoryTotalDTO> getSpendTotalBySpendCategory(Long userId, String recordTypeCode, Date date, int begin, int end) {
-        return recordDetailMapper.querySpendSpendCategoryTotalByMonth(userId, recordTypeCode, date, begin, end);
+    public List<SpendCategoryTotalDTO> getSpendTotalBySpendCategory(Integer userId, String recordTypeCode, Date date, int begin, int end) {
+        DictDO dictDO = dictService.getByCode(RecordConstant.RECORD_TYPE);
+        DictItemDO dictItemDO = dictItemService.getByValue(dictDO.getId().intValue(), recordTypeCode);
+        return recordDetailMapper.querySpendSpendCategoryTotalByMonth(userId, dictItemDO.getId().intValue(), date, begin, end);
     }
 
     @Override
-    public List<SpendCategoryTotalDTO> getSpendSpendCategoryTotalByYear(Long userId, String recordTypeCode, Date date) {
-        return recordDetailMapper.querySpendSpendCategoryTotalByYear(userId, recordTypeCode, date);
+    public List<SpendCategoryTotalDTO> getSpendSpendCategoryTotalByYear(Integer userId, String recordTypeCode, Date date) {
+        DictDO dictDO = dictService.getByCode(RecordConstant.RECORD_TYPE);
+        DictItemDO dictItemDO = dictItemService.getByValue(dictDO.getId().intValue(), recordTypeCode);
+        return recordDetailMapper.querySpendSpendCategoryTotalByYear(userId, dictItemDO.getId().intValue(), date);
     }
 
     @Override
-    public PageBO<RecordDetailDTO> getListByMonth(Long userId, String recordTypeCode, Date date, int pageIndex, int pageSize) {
-        IPage<RecordDetailDTO> dto = recordDetailMapper.queryByMonth(new Page<>(pageIndex * pageSize, pageSize), userId, recordTypeCode, date);
-        return new PageBO<>(dto.getRecords(), (int) dto.getTotal());
+    public void getMonthBookRecords(Integer recordBookId, Integer userId, Date date, Date occurTime, String keyWord, PageBO<RecordDetailDTO> pageBO) {
+        Page<RecordDetailDTO> page = new Page<>(pageBO.getPageNo(), pageBO.getPageSize());
+        recordDetailMapper.queryByMonthAndBook(page, recordBookId, userId, date, occurTime, keyWord);
+        pageBO.setTotal((int) page.getTotal());
+        pageBO.setList(page.getRecords());
     }
 
     @Override
-    public List<MonthRecordBO> getLatestSixMonthList(Long userId, String recordTypeCode, Date beginDate, Date endDate) {
-        List<MonthRecordBO> monthRecords = new ArrayList<>();
-        List<RecordDetailDTO> recordDetailDTOList = recordDetailMapper.queryByInterval(userId, recordTypeCode, beginDate, endDate);
-        // 将时间分段
+    public void getMonthAccountRecords(Integer recordAccountId, Integer userId, Date date, Date occurTime, String keyWord, PageBO<RecordDetailDTO> pageBO) {
+        Page<RecordDetailDTO> page = new Page<>(pageBO.getPageNo(), pageBO.getPageSize());
+        recordDetailMapper.queryByMonthAndAccount(page, recordAccountId, userId, date, occurTime, keyWord);
+        pageBO.setTotal((int) page.getTotal());
+        pageBO.setList(page.getRecords());
+    }
+
+    @Override
+    public void getRecoverableList(Integer userId, Integer recoverableStatus, PageBO<RecordDetailDTO> pageBO) {
+        Page<RecordDetailDTO> page = new Page<>(pageBO.getPageNo(), pageBO.getPageSize());
+        recordDetailMapper.queryRecoverableList(page, userId, recoverableStatus);
+        pageBO.setTotal((int) page.getTotal());
+        pageBO.setList(page.getRecords());
+    }
+
+    @Override
+    public List<MonthRecordAnalysisDTO> getLatestSixMonthList(Integer userId, String recordTypeCode, Date beginDate, Date endDate) {
+        DictDO dictDO = dictService.getByCode(RecordConstant.RECORD_TYPE);
+        DictItemDO dictItemDO = dictItemService.getByValue(dictDO.getId().intValue(), recordTypeCode);
+        List<MonthRecordAnalysisDTO> ret = new ArrayList<>();
+        List<MonthRecordAnalysisDTO> recordAnalysisDTOS = recordDetailMapper.queryByInterval(userId, dictItemDO.getId().intValue(), beginDate, endDate);
+        // 补充缺失的月份
         List<Long> intervalDate = DateUtil.getIntervalTimeByMonth(beginDate, endDate);
         int beginIndex = 0; // 开始标记
-        int endIndex = 0;   // 结束标记
-        for (int i=0; i<intervalDate.size() -1; i++) {
-            boolean flag = false;
-            // 找到同一个月份的并打上标记
-            for (RecordDetailDTO temp : recordDetailDTOList) {
-                if (temp.getOccurTime().getTime() >= intervalDate.get(i) &&temp.getOccurTime().getTime() < intervalDate.get(i+1)) {
-                    flag = true;
-                    endIndex ++;
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM");
+        try {
+            out: for (int i=0; i<intervalDate.size() -1; i++) {
+                Date tempDate = new Date(intervalDate.get(i));
+                for (int j=beginIndex; j<recordAnalysisDTOS.size(); j++){
+                    MonthRecordAnalysisDTO temp = recordAnalysisDTOS.get(j);
+                    if (temp == null)
+                        continue ;
+                    if (tempDate.equals(sdf.parse(temp.getOccurMonth()))){
+                        ret.add(temp);
+                        beginIndex++;
+                        continue out;   // 进入下一次循环
+                    }
                 }
+                MonthRecordAnalysisDTO monthRecord = new MonthRecordAnalysisDTO();
+                monthRecord.setOccurMonth(sdf.format(tempDate));
+                ret.add(monthRecord);
             }
-            MonthRecordBO monthRecord = new MonthRecordBO();
-            monthRecord.setOccurMonth(new Date(intervalDate.get(i)));
-            // 如果需要处理数据
-            if (flag) {
-                for (int j = beginIndex; j<endIndex; j++) {
-                    monthRecord.setTotal(monthRecord.getTotal() + recordDetailDTOList.get(j).getAmount());
-                }
-            }
-            monthRecords.add(monthRecord);
+        } catch (ParseException e){
+            throw new BusinessException(CodeMsg.FAILED);
         }
-        return monthRecords;
+
+        return ret;
+    }
+
+    @Override
+    public List<RecordDetailBookSumDTO> getSumByRecordBookIds(Integer recordTypeId, List<Integer> recordBookIds) {
+        return recordDetailMapper.querySumByRecordBookIds(recordTypeId, recordBookIds);
     }
 }

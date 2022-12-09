@@ -9,8 +9,6 @@ import cn.jackbin.SimpleRecord.service.RoleService;
 import cn.jackbin.SimpleRecord.service.UserRoleService;
 import cn.jackbin.SimpleRecord.service.UserService;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -55,10 +53,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
     }
 
     @Override
-    public PageBO<UserDO> getByPage(String username, Boolean deleted, Date date, int pageIndex, int pageSize) {
+    public void getByPage(String username, Boolean deleted, Date date, PageBO<UserDO> pageBO) {
         int total = userMapper.queryTotal(username, deleted, date);
-        List<UserDO> list = userMapper.queryByPage(username, deleted, date, pageIndex * pageSize, pageSize);
-        return new PageBO<>(list, total);
+        List<UserDO> list = userMapper.queryByPage(username, deleted, date, pageBO.beginPosition(), pageBO.getPageSize());
+        pageBO.setList(list);
+        pageBO.setTotal(total);
     }
 
     @Transactional

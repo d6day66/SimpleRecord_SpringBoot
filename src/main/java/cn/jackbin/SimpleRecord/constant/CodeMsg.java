@@ -30,6 +30,7 @@ public enum CodeMsg {
     ADD_DATA_ERROR(500011,"添加数据失败"),
     EDIT_DATA_ERROR(500012,"编辑数据失败"),
     OPERATE_FAILED(500013,"本次操作失败"),
+    CANT_OPERATE_SYS_DATA(500014,"系统内置数据不可操作"),
 
 
     // 系统相关 格式600 xxx
@@ -39,13 +40,26 @@ public enum CodeMsg {
     SEX_FORMAT_ERROR(600003,"性别未识别"),
     ROLE_NAME_EXIST(600004, "角色名重复"),
     ROLE_EDIT_NOT_ALLOWED(600005, "系统内置角色请勿删除或改名"),
+    DICT_CODE_EXIST(600006, "字典编码重复"),
 
     // 记账相关 格式700 xxx
     INSERT_RECORD_ERROR(700001,"新增记账记录失败"),
     UPDATE_RECORD_ERROR(700002,"更新记账记录失败"),
-    DEL_RECORD_FORBIDDEN(700003,"禁止删除他人记账记录"),
+    OPERATE_RECORD_FORBIDDEN(700003,"禁止操作他人记账记录"),
     DEL_RECORD_ERROR(700004,"删除记账记录失败"),
     RECORD_TYPE_CODE_ERROR(700005,"记账类型编码错误"),
+    RECORD_ACCOUNT_SIZE_TOO_MUCH(700006,"记账账户请勿过多"),
+    DEL_RECORD_BOOK_ERROR(700007,"删除账单失败"),
+    ONE_DEFAULT_RECORD_BOOK(700008,"默认账单有且仅有一个"),
+    OPERATE_RECORD_ACCOUNT_FORBIDDEN(700009,"禁止操作他人记账账户"),
+    SOURCE_ACCOUNT_NOT_NULL(700010,"源账户不能为空"),
+    SOURCE_CANT_EQUAL_TARGET_ACCOUNT(700011,"转出与转入账户不能相同"),
+    OPERATE_RECORD_BOOK_FORBIDDEN(7000012,"禁止操作他人记账账单"),
+    TARGET_RECORD_ACCOUNT_NOT_PAYMENT(700013, "目标账户不能为应收应付类型"),
+    SOURCE_RECORD_ACCOUNT_PAYMENT_ONLY(700014, "源账户只能为应收应付类型"),
+    SOURCE_RECORD_ACCOUNT_NOT_PAYMENT(700015, "源账户不能为应收应付类型"),
+    TARGET_RECORD_ACCOUNT_PAYMENT_ONLY(700016, "目标账户只能为应收应付类型"),
+    RECORD_CATEGORY_ERROR(700017, "记账类别错误")
     ;
 
     private final int retCode;

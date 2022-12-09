@@ -1,14 +1,12 @@
 package cn.jackbin.SimpleRecord.controller.record;
 
-import cn.jackbin.SimpleRecord.bo.MonthRecordBO;
-import cn.jackbin.SimpleRecord.common.LocalUser;
+import cn.jackbin.SimpleRecord.dto.MonthRecordAnalysisDTO;
+import cn.jackbin.SimpleRecord.common.LocalUserId;
 import cn.jackbin.SimpleRecord.common.anotations.CommonLog;
-import cn.jackbin.SimpleRecord.common.anotations.LoginRequired;
 import cn.jackbin.SimpleRecord.common.enums.BusinessType;
 import cn.jackbin.SimpleRecord.constant.CodeMsg;
 import cn.jackbin.SimpleRecord.constant.RecordConstant;
 import cn.jackbin.SimpleRecord.dto.SpendCategoryTotalDTO;
-import cn.jackbin.SimpleRecord.entity.UserDO;
 import cn.jackbin.SimpleRecord.service.RecordDetailService;
 import cn.jackbin.SimpleRecord.utils.DateUtil;
 import cn.jackbin.SimpleRecord.vo.GetSixMonthRecordsVO;
@@ -39,7 +37,6 @@ public class AnalysisController {
     @Autowired
     private RecordDetailService recordDetailService;
 
-    @LoginRequired
     @CommonLog(title = "获取某年所有消费类别的总额", businessType = BusinessType.QUERY)
     @ApiOperation(value = "获取某年所有消费类别的总额")
     @PreAuthorize("hasAuthority('record:analysis:spendCategoryTotal')")
@@ -50,13 +47,12 @@ public class AnalysisController {
         if (!recordType.equals(RecordConstant.EXPEND_RECORD_TYPE) && !recordType.equals(RecordConstant.INCOME_RECORD_TYPE)) {
             return Result.error(CodeMsg.RECORD_TYPE_CODE_ERROR);
         }
-        UserDO userDO = LocalUser.get();
-        List<SpendCategoryTotalDTO> list = recordDetailService.getSpendSpendCategoryTotalByYear(userDO.getId(), recordType,
+        Long userId = LocalUserId.get();
+        List<SpendCategoryTotalDTO> list = recordDetailService.getSpendSpendCategoryTotalByYear(userId.intValue(), recordType,
                 date);
         return Result.success(list);
     }
 
-    @LoginRequired
     @CommonLog(title = "获取最近六个月的支出和收入", businessType = BusinessType.QUERY)
     @ApiOperation(value = "获取最近六个月的支出和收入")
     @PreAuthorize("hasAuthority('record:analysis:latestSixMonthList')")
@@ -65,8 +61,8 @@ public class AnalysisController {
         if (!vo.getRecordTypeCode().equals(RecordConstant.EXPEND_RECORD_TYPE) && !vo.getRecordTypeCode().equals(RecordConstant.INCOME_RECORD_TYPE)) {
             return Result.error(CodeMsg.RECORD_TYPE_CODE_ERROR);
         }
-        UserDO userDO = LocalUser.get();
-        List<MonthRecordBO> list = recordDetailService.getLatestSixMonthList(userDO.getId(), vo.getRecordTypeCode(),
+        Long userId = LocalUserId.get();
+        List<MonthRecordAnalysisDTO> list = recordDetailService.getLatestSixMonthList(userId.intValue(), vo.getRecordTypeCode(),
                 vo.getBeginDate(), DateUtil.addMonth(vo.getBeginDate(), 6));
         return Result.success(list);
     }
