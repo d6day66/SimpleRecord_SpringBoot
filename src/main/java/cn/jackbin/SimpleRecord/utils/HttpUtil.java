@@ -1,5 +1,6 @@
 package cn.jackbin.SimpleRecord.utils;
 
+import cn.hutool.core.collection.CollUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -18,7 +19,7 @@ import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 
 import java.io.*;
-import java.net.*;
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -40,6 +41,53 @@ public class HttpUtil {
      * @param param 参数
      * @return
      */
+    public static String doGet(String url, Map<String, String> param, Map<String, String> headers) {
+
+        // 创建Httpclient对象
+        CloseableHttpClient httpclient = HttpClients.createDefault();
+
+        String resultString = "";
+        CloseableHttpResponse response = null;
+        try {
+            // 创建uri
+            URIBuilder builder = new URIBuilder(url);
+            if (param != null) {
+                for (String key : param.keySet()) {
+                    builder.addParameter(key, param.get(key));
+                }
+            }
+            URI uri = builder.build();
+
+            // 创建http GET请求
+            HttpGet httpGet = new HttpGet(uri);
+            if (CollUtil.isNotEmpty(headers)) {
+                for (Map.Entry<String, String> entry : headers.entrySet()) {
+                    httpGet.setHeader(entry.getKey(), entry.getValue());
+                }
+
+            }
+
+            // 执行请求
+            response = httpclient.execute(httpGet);
+            // 判断返回状态是否为200
+            if (response.getStatusLine().getStatusCode() == 200) {
+                resultString = EntityUtils.toString(response.getEntity(), getDefaultCharSet());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (response != null) {
+                    response.close();
+                }
+                httpclient.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return resultString;
+    }
+
     public static String doGet(String url, Map<String, String> param) {
 
         // 创建Httpclient对象
@@ -59,7 +107,6 @@ public class HttpUtil {
 
             // 创建http GET请求
             HttpGet httpGet = new HttpGet(uri);
-
             // 执行请求
             response = httpclient.execute(httpGet);
             // 判断返回状态是否为200
@@ -88,7 +135,7 @@ public class HttpUtil {
      * @return
      */
     public static String doGet(String url) {
-        return doGet(url, null);
+        return doGet(url, null, null);
     }
 
     /**
@@ -203,7 +250,7 @@ public class HttpUtil {
             s.setContentEncoding("UTF-8");
             httppost.setEntity(s);
             HttpResponse response = httpclient.execute(httppost);
-            if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK){
+            if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
                 // 获取相应实体
                 HttpEntity entity = response.getEntity();
                 inputStream = entity.getContent();
