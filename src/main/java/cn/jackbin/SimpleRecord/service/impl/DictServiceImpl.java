@@ -114,8 +114,12 @@ public class DictServiceImpl extends ServiceImpl<DictMapper, DictDO> implements 
         String result = HttpUtil.doGet(url, null, map);
 
         String substring = result.substring(result.indexOf("shortAnswer") + 14, result.indexOf("shortAnswer") + 18);
+        // 字符串正则
         String regEx = "[^a-zA-Z_\u4e00-\u9fa5]";
         String s = substring.replaceAll(regEx, "");
+        if (!s.contains("是")) {
+            s = "未查询到有效信息";
+        }
         return s;
     }
 

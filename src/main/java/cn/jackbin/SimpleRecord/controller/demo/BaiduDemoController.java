@@ -1,6 +1,7 @@
 package cn.jackbin.SimpleRecord.controller.demo;
 
 import cn.jackbin.SimpleRecord.service.impl.DictServiceImpl;
+import cn.jackbin.SimpleRecord.vo.Result;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -18,8 +19,9 @@ public class BaiduDemoController {
     private DictServiceImpl dictService;
 
     @GetMapping
-    public String getAnswer(String question) {
-        return dictService.demo(question);
+    public Result<?> getAnswer(String question) {
+        String demo = dictService.demo(question);
+        return Result.success(demo);
     }
 
 }
