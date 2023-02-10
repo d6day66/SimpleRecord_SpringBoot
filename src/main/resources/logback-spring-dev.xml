@@ -1,12 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--
-  ~ Copyright (c) 厦门市汇银通达数字科技有限公司  2022-2030. All rights reserved.
-  -->
 
 <configuration>
 
     <springProperty scope="context" name="appName" source="spring.application.name"/>
-    <conversionRule conversionWord="ip" converterClass="cn.jackbin.SimpleRecord.common.config.log.IpAddressClassicConverter" />
+    <conversionRule conversionWord="ip"
+                    converterClass="cn.jackbin.SimpleRecord.common.config.log.IpAddressClassicConverter"/>
     <property name="saveDir" value="./logs"/>
 
     <!-- 文件输出格式 -->
