@@ -36,9 +36,13 @@ public class ApplicationContextUtil implements ApplicationContextAware {
 
         //获取BeanFactory
         DefaultListableBeanFactory defaultListableBeanFactory = (DefaultListableBeanFactory) configurableApplicationContext.getAutowireCapableBeanFactory();
+        // 判断容器中是否存在该bean
+        boolean b = configurableApplicationContext.containsBean(beanName);
+        if (!b) {
+            //动态注册bean.
+            defaultListableBeanFactory.registerSingleton(beanName, singletonObject);
+        }
 
-        //动态注册bean.
-        defaultListableBeanFactory.registerSingleton(beanName, singletonObject);
 
         //获取动态注册的bean.
         return configurableApplicationContext.getBean(beanName);

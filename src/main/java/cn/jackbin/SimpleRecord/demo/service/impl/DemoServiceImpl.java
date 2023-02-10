@@ -19,7 +19,6 @@ public class DemoServiceImpl implements DemoService {
     public void demoMethod() {
         // 手动注册bean
         DemoObject gh = new DemoObject("gh", 33);
-        int a = 1 / 0;
         Object gh1 = ApplicationContextUtil.registerSingletonBean("gh", gh);
         System.out.println(gh1);
         log.info(String.valueOf(gh1));
