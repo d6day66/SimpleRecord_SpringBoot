@@ -1,6 +1,11 @@
 package cn.jackbin.SimpleRecord.utils;
 
+import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.http.HttpRequest;
+import cn.hutool.json.JSONObject;
+import cn.hutool.json.JSONUtil;
+import cn.jackbin.SimpleRecord.dto.UrlObjectDto;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -22,6 +27,7 @@ import java.io.*;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -281,4 +287,21 @@ public class HttpUtil {
         }
         return null;
     }
+
+    public static UrlObjectDto getCurrentServerList() {
+        String url = "http://jljx-3sm-hz.sthaozhe.com/ProjectPok/group/server_list.json?v=20232902102917 ";
+        Map<String, String> headers = new HashMap<>();
+        headers.put("User-Agent", "Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1");
+        HttpRequest get = cn.hutool.http.HttpUtil.createGet(url);
+        get.addHeaders(headers);
+        cn.hutool.http.HttpResponse execute = get.execute();
+        String body = execute.body();
+        JSONObject object = JSONUtil.parseObj(body);
+        List<UrlObjectDto> games = (List<UrlObjectDto>) object.get("games");
+        List<UrlObjectDto> urlObjects = BeanUtil.copyToList(games, UrlObjectDto.class);
+        UrlObjectDto urlObject = urlObjects.stream().filter(item -> item.getState().equals(1)).findFirst().get();
+        System.out.println(urlObject);
+        return urlObject;
+    }
 }
+

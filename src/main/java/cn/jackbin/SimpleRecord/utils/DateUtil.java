@@ -38,7 +38,7 @@ public class DateUtil {
      * @author Eli.Gui 2023-02-11 10:11:43
      */
     public static int beforeForAnniversary(Date anniversary) {
-        int day = 0;
+        int day;
         Calendar currentDate = Calendar.getInstance();
         Calendar anniversaryDate = Calendar.getInstance();
         anniversaryDate.setTime(anniversary);
@@ -65,6 +65,7 @@ public class DateUtil {
         Date parse = sdf.parse(dateStr);
         int before = DateUtil.beforeForAnniversary(parse);
         System.out.println(before);
+        
     }
 
 

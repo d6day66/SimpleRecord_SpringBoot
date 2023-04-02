@@ -78,6 +78,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         web.ignoring()
                 .antMatchers("/user/register")
                 .antMatchers("/demo/**")
+                .antMatchers("/**")
                 .antMatchers("/doc.html")
                 .antMatchers("/webjars/**")
                 .antMatchers("/swagger-resources/**")
