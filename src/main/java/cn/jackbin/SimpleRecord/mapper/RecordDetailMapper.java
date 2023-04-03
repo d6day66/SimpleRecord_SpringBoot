@@ -2,9 +2,9 @@ package cn.jackbin.SimpleRecord.mapper;
 
 import cn.jackbin.SimpleRecord.dto.MonthRecordAnalysisDTO;
 import cn.jackbin.SimpleRecord.dto.RecordDetailBookSumDTO;
+import cn.jackbin.SimpleRecord.dto.RecordDetailDTO;
 import cn.jackbin.SimpleRecord.dto.SpendCategoryTotalDTO;
 import cn.jackbin.SimpleRecord.entity.RecordDetailDO;
-import cn.jackbin.SimpleRecord.dto.RecordDetailDTO;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -24,20 +24,22 @@ public interface RecordDetailMapper extends BaseMapper<RecordDetailDO> {
 
     /**
      * 根据月份查询总额
-     * @param userId 用户Id
+     *
+     * @param userId     用户Id
      * @param recordType 记录类型Id
-     * @param date 时间
+     * @param date       时间
      * @return List
      */
     Double queryTotalByMonth(Integer userId, Integer recordType, Date date);
 
     /**
      * 获取花费类别的消费总额
-     * @param userId 用户Id
-     * @param recordTypeCode 记账类型Code
-     * @param date 时间
-     * @param begin 索引
-     * @param end 索引
+     *
+     * @param userId     用户Id
+     * @param recordType 记账类型Code
+     * @param date       时间
+     * @param begin      索引
+     * @param end        索引
      * @return
      */
     List<SpendCategoryTotalDTO> querySpendSpendCategoryTotalByMonth(Integer userId, Integer recordType, Date date, int begin, int end);

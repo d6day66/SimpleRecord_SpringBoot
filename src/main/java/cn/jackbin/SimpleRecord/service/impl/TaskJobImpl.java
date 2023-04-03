@@ -19,7 +19,7 @@ public class TaskJobImpl implements TaskJob {
     private ServerListService service;
 
     @Override
-    @Scheduled(cron = "0 0/5 * * * ?")
+    @Scheduled(cron = "0 5 0/1 * * ?")
     public void doJob() {
         UrlObjectDto urlObjectDto = service.saveHistoryList();
         if (null == urlObjectDto) {

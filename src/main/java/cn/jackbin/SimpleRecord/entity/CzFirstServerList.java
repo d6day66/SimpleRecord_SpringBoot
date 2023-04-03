@@ -1,5 +1,7 @@
 package cn.jackbin.SimpleRecord.entity;
 
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
 import lombok.Data;
 
 import java.util.Date;
@@ -11,11 +13,12 @@ import java.util.Date;
  */
 @Data
 public class CzFirstServerList {
+    @TableId(type = IdType.AUTO)
     private Integer id;
     private String name;
     private Integer code;
     private Integer state;
-    private Integer currentServe;
+    private Integer currentServer;
     private Integer version;
     private Integer delLog;
     private Date createTime;

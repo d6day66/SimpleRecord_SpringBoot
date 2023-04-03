@@ -30,17 +30,22 @@ public class ServerListServiceImpl extends ServiceImpl<CzFirstServerListMapper, 
     @Override
     public UrlObjectDto saveHistoryList() {
         UrlObjectDto currentServerList = HttpUtil.getCurrentServerList();
-        CzFirstServerList one = this.getOne(Wrappers.<CzFirstServerList>lambdaQuery().eq(CzFirstServerList::getCurrentServe, 1));
-        if (null != one && one.getCode() <= currentServerList.getId()) {
+        CzFirstServerList one = this.getOne(Wrappers.<CzFirstServerList>lambdaQuery().eq(CzFirstServerList::getCurrentServer, 1));
+        if (null != one && one.getCode() >= currentServerList.getId()) {
             log.info("未新增服务器");
             return null;
         }
+        if (null != one) {
+            one.setCurrentServer(0);
+            this.updateById(one);
+        }
         CzFirstServerList czFirstServerList = BeanUtil.copyProperties(currentServerList, CzFirstServerList.class);
+        czFirstServerList.setId(null);
         czFirstServerList.setVersion(0);
         czFirstServerList.setCreateTime(new Date());
         czFirstServerList.setUpdateTime(new Date());
         czFirstServerList.setDelLog(0);
-        czFirstServerList.setCurrentServe(1);
+        czFirstServerList.setCurrentServer(1);
         czFirstServerList.setCode(currentServerList.getId());
         this.save(czFirstServerList);
         return currentServerList;
